@@ -131,5 +131,5 @@ func FigmaComments(w http.ResponseWriter, r *http.Request) {
 func generateInsertStatement(file string, date time.Time, comments, resolved int) string {
 	return fmt.Sprintf("INSERT INTO"+
 		"`atb-mobility-platform.figma_comments_okr.%s`"+
-		"VALUES(DATE(%d, %d, %d), %d, %d)", file, date.Year(), date.Month(), date.Day(), comments, resolved)
+		"VALUES(%s, %d, %d)", file, "CURRENT_TIMESTAMP()", comments, resolved)
 }
