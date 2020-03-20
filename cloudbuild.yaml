@@ -1,0 +1,24 @@
+steps:
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - kms
+      - decrypt
+      - --ciphertext-file=environment.yaml.crypt
+      - --plaintext-file=environment.yaml
+      - --location=europe-west1
+      - --keyring=amp
+      - --key=testKey
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      [
+        'functions',
+        'deploy',
+        '--region=europe-west1',
+        'FigmaComments',
+        '--trigger-http',
+        '--runtime',
+        'go111',
+        '--allow-unauthenticated',
+        '--env-vars-file',
+        'environment.yaml',
+      ]
