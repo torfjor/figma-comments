@@ -50,6 +50,7 @@ const (
 )
 
 var (
+	client      *http.Client
 	bc          *bigquery.Client
 	ctx         context.Context
 	figmaSecret string
@@ -58,7 +59,9 @@ var (
 func init() {
 	ctx = context.Background()
 	figmaSecret = os.Getenv("FIGMA_SECRET")
-
+	client = &http.Client{
+		Timeout: 10 * time.Second,
+	}
 	var err error
 	bc, err = bigquery.NewClient(ctx, projectID)
 	if err != nil {
@@ -86,7 +89,7 @@ func FigmaComments(w http.ResponseWriter, r *http.Request) {
 	req.Header.Set("X-Figma-Token", figmaSecret)
 
 	// Send request
-	res, err := http.DefaultClient.Do(req)
+	res, err := client.Do(req)
 	if err != nil {
 		http.Error(w, "http: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -115,7 +118,7 @@ func FigmaComments(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate BigQuery insert statement
-	ins := generateInsertStatement(file, time.Now(), len(f.Comments), f.Resolved())
+	ins := generateQuery(file, time.Now(), len(f.Comments), f.Resolved())
 	q := bc.Query(ins)
 	_, err = q.Run(ctx)
 	if err != nil {
@@ -128,8 +131,10 @@ func FigmaComments(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func generateInsertStatement(file string, date time.Time, comments, resolved int) string {
-	return fmt.Sprintf("INSERT INTO"+
-		"`atb-mobility-platform.figma_comments_okr.%s`"+
-		"VALUES(%s, %d, %d)", file, "CURRENT_TIMESTAMP()", comments, resolved)
+func generateQuery(file string, date time.Time, comments, resolved int) string {
+	return fmt.Sprintf(`
+		INSERT INTO`+
+		"`%s.figma_comments_okr.%s`"+
+		`VALUES(%s, %d, %d)`,
+		projectID, file, "CURRENT_TIMESTAMP()", comments, resolved)
 }
