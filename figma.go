@@ -10,21 +10,21 @@ import (
 
 // CommentsResponse represents the response returned from the Figma API for the :file/comments endpoint
 type CommentsResponse struct {
-	Comments []comment `json:"comments"`
+	Comments []Comment `json:"comments"`
 }
 
-type comment struct {
+type Comment struct {
 	ID         string     `json:"id"`
 	FileKey    string     `json:"file_key"`
 	ParentID   string     `json:"parent_id"`
-	User       *user      `json:"user"`
+	User       *User      `json:"user"`
 	CreatedAt  *time.Time `json:"created_at"`
 	ResolvedAt *time.Time `json:"resolved_at"`
 	OrderID    string     `json:"order_id"`
 	Message    string     `json:"message"`
 }
 
-type user struct {
+type User struct {
 	Handle string `json:"handle"`
 	ImgURL string `json:"img_url"`
 	ID     string `json:"id"`
