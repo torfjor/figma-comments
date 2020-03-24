@@ -81,7 +81,7 @@ func (f *FigmaClient) Comments(file string) (*CommentsResponse, error) {
 
 	// Verify response
 	if res.StatusCode != http.StatusOK {
-		return nil, err
+		return nil, fmt.Errorf("figma: unexpected status: %d", res.StatusCode)
 	}
 
 	// Read body
